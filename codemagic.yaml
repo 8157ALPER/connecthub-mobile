@@ -39,10 +39,14 @@ workflows:
           echo "=== Android assets after copy ==="
           ls -la android/app/src/main/assets/
           ls -la android/app/src/main/assets/public/
+      - name: Remove existing Android directory
+        script: |
+          echo "=== Removing incomplete Android directory ==="
+          rm -rf android
       - name: Capacitor add Android platform
         script: |
-          echo "=== Re-adding Android platform with all files ==="
-          npx cap add android --confirm
+          echo "=== Adding fresh Android platform ==="
+          npx cap add android
       - name: Verify Android setup
         script: |
           echo "=== Android directory after cap add ==="
