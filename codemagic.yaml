@@ -59,12 +59,22 @@ workflows:
         script: |
           echo "=== Copying web assets ==="
           npx cap copy android
-      - name: Build Android AAB (unsigned)
+      - name: Check Gradle build files
+        script: |
+          cd android
+          echo "=== Checking build.gradle files ==="
+          ls -la build.gradle
+          ls -la app/build.gradle
+          echo "=== Gradle wrapper info ==="
+          ls -la gradle/wrapper/
+      - name: Clean and build Android AAB
         script: |
           cd android
           chmod +x gradlew
-          echo "=== Building Android AAB ==="
-          ./gradlew bundleDebug --stacktrace
+          echo "=== Cleaning previous build ==="
+          ./gradlew clean --info
+          echo "=== Building Android AAB with full output ==="
+          ./gradlew bundleDebug --info --debug 2>&1 | head -100
     artifacts:
       - android/app/build/outputs/**/*.aab
     publishing:
