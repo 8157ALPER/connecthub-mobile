@@ -39,28 +39,28 @@ workflows:
           echo "=== Android assets after copy ==="
           ls -la android/app/src/main/assets/
           ls -la android/app/src/main/assets/public/
-      - name: Capacitor sync (update only)
+      - name: Capacitor add Android platform
         script: |
-          echo "=== Running Capacitor update ==="
-          npx cap update android
-      - name: Check Android directory
+          echo "=== Re-adding Android platform with all files ==="
+          npx cap add android --confirm
+      - name: Verify Android setup
         script: |
-          echo "=== Android directory contents ==="
+          echo "=== Android directory after cap add ==="
           ls -la android/
-          echo "=== Gradle wrapper check ==="
+          echo "=== Checking for gradlew ==="
+          ls -la android/gradlew
+          echo "=== Checking gradle wrapper ==="
           ls -la android/gradle/wrapper/
-      - name: Fix Gradle wrapper permissions
+      - name: Copy web assets to Android
         script: |
-          cd android
-          echo "=== Making gradlew executable ==="
-          chmod +x gradlew
-          chmod +x gradle/wrapper/gradle-wrapper.jar
-          ls -la gradlew
+          echo "=== Copying web assets ==="
+          npx cap copy android
       - name: Build Android AAB (unsigned)
         script: |
           cd android
+          chmod +x gradlew
           echo "=== Building Android AAB ==="
-          ./gradlew bundleDebug --stacktrace --info
+          ./gradlew bundleDebug --stacktrace
     artifacts:
       - android/app/build/outputs/**/*.aab
     publishing:
