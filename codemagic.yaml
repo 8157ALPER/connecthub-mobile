@@ -17,9 +17,9 @@ workflows:
       - name: Install npm dependencies
         script: |
           npm ci --legacy-peer-deps
-      - name: Install Capacitor CLI globally
+      - name: Install compatible Capacitor CLI
         script: |
-          npm install -g @capacitor/cli@latest
+          npm install -g @capacitor/cli@6.1.2
       - name: Build frontend only (Vite)
         script: |
           echo "=== Building frontend with Vite ==="
@@ -44,42 +44,21 @@ workflows:
         script: |
           echo "=== Removing incomplete Android directory ==="
           rm -rf android
+      - name: Downgrade Capacitor packages for Java 17
+        script: |
+          echo "=== Installing Java 17 compatible Capacitor ==="
+          npm install @capacitor/core@6.1.2 @capacitor/cli@6.1.2 @capacitor/android@6.1.2
+          npm install @capacitor/keyboard@6.0.1 @capacitor/splash-screen@6.0.1 @capacitor/status-bar@6.0.1
       - name: Capacitor add Android platform
         script: |
-          echo "=== Adding fresh Android platform ==="
+          echo "=== Adding Android platform with Java 17 compatible version ==="
           npx cap add android
-      - name: Force Java 17 compatibility everywhere
+      - name: Verify Capacitor 6.x installation
         script: |
-          echo "=== Forcing Java 17 compatibility aggressively ==="
-          cd android
-          
-          # Set global gradle properties
-          cat > gradle.properties << 'EOF'
-          android.useAndroidX=true
-          android.enableJetifier=true
-          org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError
-          android.defaults.buildfeatures.buildconfig=true
-          android.nonTransitiveRClass=false
-          android.nonFinalResIds=false
-          org.gradle.java.home=/usr/lib/jvm/java-17-openjdk
-          EOF
-          
-          # Force Java 17 in all build.gradle files
-          find . -name "build.gradle" -type f | while read file; do
-            echo "Fixing Java version in: $file"
-            # Replace any Java version references
-            sed -i 's/JavaVersion\.VERSION_[0-9]\+/JavaVersion.VERSION_17/g' "$file"
-            sed -i 's/jvmTarget = "[0-9]\+"/jvmTarget = "17"/g' "$file"
-            sed -i 's/sourceCompatibility = "[0-9]\+"/sourceCompatibility = "17"/g' "$file"
-            sed -i 's/targetCompatibility = "[0-9]\+"/targetCompatibility = "17"/g' "$file"
-            sed -i 's/compileSdk [0-9]\+/compileSdk 34/g' "$file"
-            sed -i 's/targetSdk [0-9]\+/targetSdk 34/g' "$file"
-          done
-          
-          # Show what we fixed
-          echo "=== Checking for remaining Java 21 references ==="
-          grep -r "21" . --include="*.gradle" || echo "No Java 21 references found"
-          echo "=== Java 17 force applied to all files ==="
+          echo "=== Checking Capacitor versions ==="
+          npx cap --version
+          npm list @capacitor/core @capacitor/android @capacitor/cli
+          echo "=== Should show version 6.x for Java 17 compatibility ==="
       - name: Verify Android setup
         script: |
           echo "=== Android directory after cap add ==="
