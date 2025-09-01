@@ -16,12 +16,9 @@ workflows:
       - name: Install npm dependencies
         script: |
           npm ci --legacy-peer-deps
-      - name: Check project structure
+      - name: Install Capacitor CLI globally
         script: |
-          echo "=== Project Structure ==="
-          ls -la
-          echo "=== Client directory ==="
-          ls -la client/
+          npm install -g @capacitor/cli@latest
       - name: Build frontend only (Vite)
         script: |
           echo "=== Building frontend with Vite ==="
@@ -29,28 +26,29 @@ workflows:
       - name: Verify build output
         script: |
           echo "=== Checking build output ==="
-          ls -la dist/
           ls -la dist/public/
-          echo "=== Build output files ==="
-          find dist/public -type f | head -10
-      - name: Install Capacitor CLI globally
+          echo "=== Key files ==="
+          ls -la dist/public/index.html
+          ls -la dist/public/assets/
+      - name: Try Capacitor copy first
         script: |
-          npm install -g @capacitor/cli@latest
-      - name: Capacitor sync with verbose output
+          echo "=== Trying Capacitor copy ==="
+          npx cap copy android
+      - name: Check what was copied
         script: |
-          echo "=== Running Capacitor sync ==="
-          npx cap sync android --verbose
-      - name: Verify Android assets
-        script: |
-          echo "=== Checking Android assets ==="
+          echo "=== Android assets after copy ==="
           ls -la android/app/src/main/assets/
           ls -la android/app/src/main/assets/public/
+      - name: Capacitor sync (update only)
+        script: |
+          echo "=== Running Capacitor update ==="
+          npx cap update android
       - name: Build Android AAB (unsigned)
         script: |
           cd android
           chmod +x gradlew
           echo "=== Building Android AAB ==="
-          ./gradlew bundleDebug --stacktrace --info
+          ./gradlew bundleDebug --stacktrace
     artifacts:
       - android/app/build/outputs/**/*.aab
     publishing:
