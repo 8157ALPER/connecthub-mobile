@@ -16,24 +16,41 @@ workflows:
       - name: Install npm dependencies
         script: |
           npm ci --legacy-peer-deps
+      - name: Check project structure
+        script: |
+          echo "=== Project Structure ==="
+          ls -la
+          echo "=== Client directory ==="
+          ls -la client/
+      - name: Build frontend only (Vite)
+        script: |
+          echo "=== Building frontend with Vite ==="
+          npx vite build --mode production
+      - name: Verify build output
+        script: |
+          echo "=== Checking build output ==="
+          ls -la dist/
+          ls -la dist/public/
+          echo "=== Build output files ==="
+          find dist/public -type f | head -10
       - name: Install Capacitor CLI globally
         script: |
           npm install -g @capacitor/cli@latest
-      - name: Build frontend first
-        script: |
-          npm run build
       - name: Capacitor sync with verbose output
         script: |
+          echo "=== Running Capacitor sync ==="
           npx cap sync android --verbose
-      - name: Check Android project structure
+      - name: Verify Android assets
         script: |
-          ls -la android/
-          ls -la android/app/src/main/
+          echo "=== Checking Android assets ==="
+          ls -la android/app/src/main/assets/
+          ls -la android/app/src/main/assets/public/
       - name: Build Android AAB (unsigned)
         script: |
           cd android
           chmod +x gradlew
-          ./gradlew bundleDebug --stacktrace
+          echo "=== Building Android AAB ==="
+          ./gradlew bundleDebug --stacktrace --info
     artifacts:
       - android/app/build/outputs/**/*.aab
     publishing:
