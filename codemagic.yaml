@@ -9,6 +9,7 @@ workflows:
       vars:
         PACKAGE_NAME: "com.connecthub.app"
       node: 20.18.0
+      java: 17
     scripts:
       - name: Set up local.properties
         script: |
@@ -47,6 +48,20 @@ workflows:
         script: |
           echo "=== Adding fresh Android platform ==="
           npx cap add android
+      - name: Fix Java version compatibility
+        script: |
+          echo "=== Setting Java 17 compatibility ==="
+          cd android
+          # Update gradle.properties for Java 17
+          echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError" >> gradle.properties
+          # Fix app build.gradle
+          sed -i.bak 's/sourceCompatibility JavaVersion.VERSION_21/sourceCompatibility JavaVersion.VERSION_17/g' app/build.gradle
+          sed -i.bak 's/targetCompatibility JavaVersion.VERSION_21/targetCompatibility JavaVersion.VERSION_17/g' app/build.gradle
+          sed -i.bak 's/jvmTarget = "21"/jvmTarget = "17"/g' app/build.gradle
+          # Fix any Java 21 references in capacitor modules
+          find . -name "build.gradle" -exec sed -i.bak 's/JavaVersion.VERSION_21/JavaVersion.VERSION_17/g' {} \;
+          find . -name "build.gradle" -exec sed -i.bak 's/jvmTarget = "21"/jvmTarget = "17"/g' {} \;
+          echo "=== Java version fixes applied ==="
       - name: Verify Android setup
         script: |
           echo "=== Android directory after cap add ==="
