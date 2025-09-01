@@ -43,12 +43,24 @@ workflows:
         script: |
           echo "=== Running Capacitor update ==="
           npx cap update android
+      - name: Check Android directory
+        script: |
+          echo "=== Android directory contents ==="
+          ls -la android/
+          echo "=== Gradle wrapper check ==="
+          ls -la android/gradle/wrapper/
+      - name: Fix Gradle wrapper permissions
+        script: |
+          cd android
+          echo "=== Making gradlew executable ==="
+          chmod +x gradlew
+          chmod +x gradle/wrapper/gradle-wrapper.jar
+          ls -la gradlew
       - name: Build Android AAB (unsigned)
         script: |
           cd android
-          chmod +x gradlew
           echo "=== Building Android AAB ==="
-          ./gradlew bundleDebug --stacktrace
+          ./gradlew bundleDebug --stacktrace --info
     artifacts:
       - android/app/build/outputs/**/*.aab
     publishing:
