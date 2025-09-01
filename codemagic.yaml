@@ -8,7 +8,7 @@ workflows:
         - google_play
       vars:
         PACKAGE_NAME: "com.connecthub.app"
-      node: 18.19.0
+      node: 20.18.0
     scripts:
       - name: Set up local.properties
         script: |
