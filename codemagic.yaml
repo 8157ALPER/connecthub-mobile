@@ -15,14 +15,25 @@ workflows:
           echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/android/local.properties"
       - name: Install npm dependencies
         script: |
-          npm ci
-      - name: Capacitor sync
+          npm ci --legacy-peer-deps
+      - name: Install Capacitor CLI globally
         script: |
-          npx cap sync android
+          npm install -g @capacitor/cli@latest
+      - name: Build frontend first
+        script: |
+          npm run build
+      - name: Capacitor sync with verbose output
+        script: |
+          npx cap sync android --verbose
+      - name: Check Android project structure
+        script: |
+          ls -la android/
+          ls -la android/app/src/main/
       - name: Build Android AAB (unsigned)
         script: |
           cd android
-          ./gradlew bundleDebug
+          chmod +x gradlew
+          ./gradlew bundleDebug --stacktrace
     artifacts:
       - android/app/build/outputs/**/*.aab
     publishing:
