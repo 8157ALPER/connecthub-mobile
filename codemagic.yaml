@@ -44,11 +44,11 @@ workflows:
         script: |
           echo "=== Removing incomplete Android directory ==="
           rm -rf android
-      - name: Downgrade Capacitor packages for Java 17
+      - name: Force downgrade Capacitor packages for Java 17
         script: |
-          echo "=== Installing Java 17 compatible Capacitor ==="
-          npm install @capacitor/core@6.1.2 @capacitor/cli@6.1.2 @capacitor/android@6.1.2
-          npm install @capacitor/keyboard@6.0.1 @capacitor/splash-screen@6.0.1 @capacitor/status-bar@6.0.1
+          echo "=== Force installing Java 17 compatible Capacitor ==="
+          npm install @capacitor/core@6.1.2 @capacitor/cli@6.1.2 @capacitor/android@6.1.2 --force
+          npm install @capacitor/keyboard@6.0.1 @capacitor/splash-screen@6.0.1 @capacitor/status-bar@6.0.1 --force
       - name: Capacitor add Android platform
         script: |
           echo "=== Adding Android platform with Java 17 compatible version ==="
