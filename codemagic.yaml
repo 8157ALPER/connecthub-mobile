@@ -72,11 +72,24 @@ workflows:
           cd android
           chmod +x gradlew
           echo "=== Cleaning previous build ==="
-          ./gradlew clean --info
-          echo "=== Building Android AAB with full output ==="
-          ./gradlew bundleDebug --info --debug 2>&1 | head -100
+          ./gradlew clean
+          echo "=== Building Android AAB ==="
+          ./gradlew bundleDebug
+      - name: Find all build outputs
+        script: |
+          cd android
+          echo "=== Searching for all build outputs ==="
+          find . -name "*.aab" -type f 2>/dev/null || echo "No .aab files found"
+          find . -name "*.apk" -type f 2>/dev/null || echo "No .apk files found"
+          echo "=== Build outputs directory structure ==="
+          ls -la app/build/outputs/ 2>/dev/null || echo "No outputs directory"
+          find app/build/outputs/ -type f 2>/dev/null || echo "No files in outputs"
+          echo "=== Complete app/build structure ==="
+          find app/build/ -name "*bundle*" -o -name "*aab*" -o -name "*apk*" 2>/dev/null || echo "No bundle/aab/apk files found"
     artifacts:
-      - android/app/build/outputs/**/*.aab
+      - android/app/build/outputs/**/*
+      - android/app/build/**/*.aab
+      - android/app/build/**/*.apk
     publishing:
       email:
         recipients:
