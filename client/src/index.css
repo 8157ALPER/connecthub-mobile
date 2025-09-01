@@ -1,0 +1,213 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(240, 3%, 98%);
+  --foreground: hsl(210, 25%, 7.8431%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(210, 25%, 7.8431%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(210, 25%, 7.8431%);
+  --primary: hsl(258, 90%, 66%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(37, 91%, 55%);
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --muted: hsl(240, 1.9608%, 90%);
+  --muted-foreground: hsl(210, 25%, 7.8431%);
+  --accent: hsl(157, 72%, 38%);
+  --accent-foreground: hsl(0, 0%, 100%);
+  --destructive: hsl(356.3033, 90.5579%, 54.3137%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(201.4286, 30.4348%, 90.9804%);
+  --input: hsl(200, 23.0769%, 97.4510%);
+  --ring: hsl(258, 90%, 66%);
+  --chart-1: hsl(258, 90%, 66%);
+  --chart-2: hsl(157, 72%, 38%);
+  --chart-3: hsl(37, 91%, 55%);
+  --chart-4: hsl(221, 83%, 53%);
+  --chart-5: hsl(340, 82%, 52%);
+  --sidebar: hsl(0, 0%, 100%);
+  --sidebar-foreground: hsl(210, 25%, 7.8431%);
+  --sidebar-primary: hsl(258, 90%, 66%);
+  --sidebar-primary-foreground: hsl(0, 0%, 100%);
+  --sidebar-accent: hsl(240, 3%, 95%);
+  --sidebar-accent-foreground: hsl(258, 90%, 66%);
+  --sidebar-border: hsl(201.4286, 30.4348%, 90.9804%);
+  --sidebar-ring: hsl(258, 90%, 66%);
+  --font-sans: 'Inter', sans-serif;
+  --font-serif: Georgia, serif;
+  --font-mono: Menlo, monospace;
+  --radius: 1.3rem;
+  --shadow-2xs: 0px 2px 0px 0px hsl(258, 90%, 66% / 0.00);
+  --shadow-xs: 0px 2px 0px 0px hsl(258, 90%, 66% / 0.00);
+  --shadow-sm: 0px 2px 0px 0px hsl(258, 90%, 66% / 0.00), 0px 1px 2px -1px hsl(258, 90%, 66% / 0.00);
+  --shadow: 0px 2px 0px 0px hsl(258, 90%, 66% / 0.00), 0px 1px 2px -1px hsl(258, 90%, 66% / 0.00);
+  --shadow-md: 0px 2px 0px 0px hsl(258, 90%, 66% / 0.00), 0px 2px 4px -1px hsl(258, 90%, 66% / 0.00);
+  --shadow-lg: 0px 2px 0px 0px hsl(258, 90%, 66% / 0.00), 0px 4px 6px -1px hsl(258, 90%, 66% / 0.00);
+  --shadow-xl: 0px 2px 0px 0px hsl(258, 90%, 66% / 0.00), 0px 8px 10px -1px hsl(258, 90%, 66% / 0.00);
+  --shadow-2xl: 0px 2px 0px 0px hsl(258, 90%, 66% / 0.00);
+  --tracking-normal: 0em;
+  --spacing: 0.25rem;
+  
+  /* Interest Colors */
+  --interest-blue: hsl(221, 83%, 53%);
+  --interest-pink: hsl(340, 82%, 52%);
+  --interest-green: hsl(157, 72%, 38%);
+  --interest-yellow: hsl(37, 91%, 55%);
+  --interest-purple: hsl(258, 90%, 66%);
+  --interest-red: hsl(0, 84%, 60%);
+}
+
+.dark {
+  --background: hsl(0, 0%, 0%);
+  --foreground: hsl(200, 6.6667%, 91.1765%);
+  --card: hsl(228, 9.8039%, 10%);
+  --card-foreground: hsl(0, 0%, 85.0980%);
+  --popover: hsl(0, 0%, 0%);
+  --popover-foreground: hsl(200, 6.6667%, 91.1765%);
+  --primary: hsl(258, 90%, 66%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(37, 91%, 55%);
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --muted: hsl(0, 0%, 9.4118%);
+  --muted-foreground: hsl(210, 3.3898%, 46.2745%);
+  --accent: hsl(157, 72%, 38%);
+  --accent-foreground: hsl(0, 0%, 100%);
+  --destructive: hsl(356.3033, 90.5579%, 54.3137%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(210, 5.2632%, 14.9020%);
+  --input: hsl(207.6923, 27.6596%, 18.4314%);
+  --ring: hsl(258, 90%, 66%);
+  --chart-1: hsl(258, 90%, 66%);
+  --chart-2: hsl(157, 72%, 38%);
+  --chart-3: hsl(37, 91%, 55%);
+  --chart-4: hsl(221, 83%, 53%);
+  --chart-5: hsl(340, 82%, 52%);
+  --sidebar: hsl(228, 9.8039%, 10%);
+  --sidebar-foreground: hsl(0, 0%, 85.0980%);
+  --sidebar-primary: hsl(258, 90%, 66%);
+  --sidebar-primary-foreground: hsl(0, 0%, 100%);
+  --sidebar-accent: hsl(228, 9.8039%, 15%);
+  --sidebar-accent-foreground: hsl(258, 90%, 66%);
+  --sidebar-border: hsl(205.7143, 15.7895%, 26.0784%);
+  --sidebar-ring: hsl(258, 90%, 66%);
+  --font-sans: 'Inter', sans-serif;
+  --font-serif: Georgia, serif;
+  --font-mono: Menlo, monospace;
+  --radius: 1.3rem;
+  --shadow-2xs: 0px 2px 0px 0px hsl(258, 90%, 66% / 0.00);
+  --shadow-xs: 0px 2px 0px 0px hsl(258, 90%, 66% / 0.00);
+  --shadow-sm: 0px 2px 0px 0px hsl(258, 90%, 66% / 0.00), 0px 1px 2px -1px hsl(258, 90%, 66% / 0.00);
+  --shadow: 0px 2px 0px 0px hsl(258, 90%, 66% / 0.00), 0px 1px 2px -1px hsl(258, 90%, 66% / 0.00);
+  --shadow-md: 0px 2px 0px 0px hsl(258, 90%, 66% / 0.00), 0px 2px 4px -1px hsl(258, 90%, 66% / 0.00);
+  --shadow-lg: 0px 2px 0px 0px hsl(258, 90%, 66% / 0.00), 0px 4px 6px -1px hsl(258, 90%, 66% / 0.00);
+  --shadow-xl: 0px 2px 0px 0px hsl(258, 90%, 66% / 0.00), 0px 8px 10px -1px hsl(258, 90%, 66% / 0.00);
+  --shadow-2xl: 0px 2px 0px 0px hsl(258, 90%, 66% / 0.00);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+@layer components {
+  .interest-blue {
+    @apply bg-blue-500 text-white;
+    background-color: var(--interest-blue);
+  }
+  
+  .interest-pink {
+    @apply bg-pink-500 text-white;
+    background-color: var(--interest-pink);
+  }
+  
+  .interest-green {
+    @apply bg-green-500 text-white;
+    background-color: var(--interest-green);
+  }
+  
+  .interest-yellow {
+    @apply bg-yellow-500 text-white;
+    background-color: var(--interest-yellow);
+  }
+  
+  .interest-purple {
+    @apply bg-purple-500 text-white;
+    background-color: var(--interest-purple);
+  }
+  
+  .interest-red {
+    @apply bg-red-500 text-white;
+    background-color: var(--interest-red);
+  }
+
+  /* Mobile-friendly touch interactions for elderly users */
+  .touch-manipulation {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    min-height: 44px; /* Apple's recommended minimum touch target */
+    user-select: none;
+  }
+
+  .touch-manipulation:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+
+  /* Improve readability on mobile */
+  @media (max-width: 768px) {
+    body {
+      font-size: 16px; /* Prevent zoom on iOS */
+    }
+    
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="search"],
+    textarea {
+      font-size: 16px; /* Prevent zoom on iOS */
+    }
+    
+    button, .btn {
+      min-height: 48px; /* Larger touch targets for elderly users */
+      font-size: 1.1rem;
+    }
+    
+    /* Larger spacing for mobile cards */
+    .card {
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    /* Better mobile navigation */
+    .mobile-nav-item {
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+    }
+  }
+
+  /* Extra large touch targets for elderly users */
+  .elderly-friendly {
+    min-height: 56px;
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  @media (max-width: 640px) {
+    .elderly-friendly {
+      min-height: 64px;
+      font-size: 1.375rem;
+    }
+  }
+}
