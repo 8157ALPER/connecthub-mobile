@@ -8,15 +8,11 @@ const config: CapacitorConfig = {
     androidScheme: 'https'
   },
   android: {
-    minWebViewVersion: 100,
     allowMixedContent: true,
     captureInput: true,
     webContentsDebuggingEnabled: true
   },
   plugins: {
-    CapacitorHttp: {
-      enabled: true
-    },
     SplashScreen: {
       launchShowDuration: 3000,
       launchAutoHide: true,
