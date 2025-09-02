@@ -4,10 +4,13 @@ workflows:
     max_build_duration: 60
     instance_type: mac_mini_m1
     environment:
+      android_signing:
+        - keystore_reference
       groups:
         - google_play
       vars:
         PACKAGE_NAME: "com.connecthub.app"
+        GOOGLE_PLAY_TRACK: internal
       node: 20.18.0
       java: 17
     scripts:
@@ -79,14 +82,38 @@ workflows:
           ls -la app/build.gradle
           echo "=== Gradle wrapper info ==="
           ls -la gradle/wrapper/
-      - name: Clean and build Android AAB
+      - name: Set up app signing
+        script: |
+          cd android
+          echo "=== Setting up release signing ==="
+          cat >> app/build.gradle << 'EOF'
+          
+          android {
+              signingConfigs {
+                  release {
+                      if (System.getenv()["CM_KEYSTORE_PATH"]) {
+                          storeFile file(System.getenv()["CM_KEYSTORE_PATH"])
+                          storePassword System.getenv()["CM_KEYSTORE_PASSWORD"]
+                          keyAlias System.getenv()["CM_KEY_ALIAS"]
+                          keyPassword System.getenv()["CM_KEY_PASSWORD"]
+                      }
+                  }
+              }
+              buildTypes {
+                  release {
+                      signingConfig signingConfigs.release
+                  }
+              }
+          }
+          EOF
+      - name: Clean and build signed Android AAB
         script: |
           cd android
           chmod +x gradlew
           echo "=== Cleaning previous build ==="
           ./gradlew clean
-          echo "=== Building Android AAB ==="
-          ./gradlew bundleDebug
+          echo "=== Building SIGNED release AAB ==="
+          ./gradlew bundleRelease
       - name: Find all build outputs
         script: |
           cd android
