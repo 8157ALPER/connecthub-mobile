@@ -4,8 +4,6 @@ workflows:
     max_build_duration: 60
     instance_type: mac_mini_m1
     environment:
-      android_signing:
-        - keystore_reference
       groups:
         - google_play
       vars:
@@ -82,37 +80,13 @@ workflows:
           ls -la app/build.gradle
           echo "=== Gradle wrapper info ==="
           ls -la gradle/wrapper/
-      - name: Set up app signing
-        script: |
-          cd android
-          echo "=== Setting up release signing ==="
-          cat >> app/build.gradle << 'EOF'
-          
-          android {
-              signingConfigs {
-                  release {
-                      if (System.getenv()["CM_KEYSTORE_PATH"]) {
-                          storeFile file(System.getenv()["CM_KEYSTORE_PATH"])
-                          storePassword System.getenv()["CM_KEYSTORE_PASSWORD"]
-                          keyAlias System.getenv()["CM_KEY_ALIAS"]
-                          keyPassword System.getenv()["CM_KEY_PASSWORD"]
-                      }
-                  }
-              }
-              buildTypes {
-                  release {
-                      signingConfig signingConfigs.release
-                  }
-              }
-          }
-          EOF
-      - name: Clean and build signed Android AAB
+      - name: Clean and build release Android AAB
         script: |
           cd android
           chmod +x gradlew
           echo "=== Cleaning previous build ==="
           ./gradlew clean
-          echo "=== Building SIGNED release AAB ==="
+          echo "=== Building release AAB (Google Play will sign) ==="
           ./gradlew bundleRelease
       - name: Find all build outputs
         script: |
