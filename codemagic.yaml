@@ -80,14 +80,23 @@ workflows:
           ls -la app/build.gradle
           echo "=== Gradle wrapper info ==="
           ls -la gradle/wrapper/
-      - name: Clean and build release Android AAB
+      - name: Generate debug keystore for signing
+        script: |
+          cd android
+          echo "=== Creating debug keystore for signing ==="
+          mkdir -p ~/.android
+          keytool -genkey -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+      - name: Clean and build signed Android AAB
         script: |
           cd android
           chmod +x gradlew
           echo "=== Cleaning previous build ==="
           ./gradlew clean
-          echo "=== Building release AAB (Google Play will sign) ==="
-          ./gradlew bundleRelease
+          echo "=== Building SIGNED debug AAB ==="
+          ./gradlew bundleDebug
+          echo "=== Verifying AAB is signed ==="
+          find app/build/outputs -name "*.aab" -exec echo "Found AAB: {}" \;
+          find app/build/outputs -name "*.aab" -exec jarsigner -verify -verbose {} \;
       - name: Find all build outputs
         script: |
           cd android
