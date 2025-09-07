@@ -116,11 +116,14 @@ workflows:
           chmod +x gradlew
           echo "=== Cleaning previous build ==="
           ./gradlew clean
-          echo "=== Building RELEASE AAB with UPLOAD KEY ==="
+          echo "=== Checking API levels ==="
+          grep -r "targetSdkVersion\|compileSdkVersion" .
+          echo "=== Building RELEASE AAB with UPLOAD KEY (API 35) ==="
           ./gradlew bundleRelease
           echo "=== Verifying AAB is signed with upload key ==="
           find app/build/outputs -name "*.aab" -exec echo "Found AAB: {}" \;
           find app/build/outputs -name "*.aab" -exec jarsigner -verify -verbose {} \;
+          echo "=== Build completed with API level 35 ==="
       - name: Find all build outputs
         script: |
           cd android
