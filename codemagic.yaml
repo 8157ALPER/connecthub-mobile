@@ -80,23 +80,45 @@ workflows:
           ls -la app/build.gradle
           echo "=== Gradle wrapper info ==="
           ls -la gradle/wrapper/
-      - name: Generate debug keystore for signing
+      - name: Generate upload keystore for Google Play
         script: |
           cd android
-          echo "=== Setting up debug keystore for signing ==="
+          echo "=== Creating UPLOAD KEYSTORE for Google Play Console ==="
           mkdir -p ~/.android
-          rm -f ~/.android/debug.keystore
-          keytool -genkey -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
-          echo "=== Debug keystore created successfully ==="
-      - name: Clean and build signed Android AAB
+          rm -f ~/.android/upload-keystore.jks
+          keytool -genkey -v -keystore ~/.android/upload-keystore.jks -storepass connecthub123 -alias upload-key -keypass connecthub123 -keyalg RSA -keysize 2048 -validity 25000 -dname "CN=ConnectHub,OU=Mobile,O=ConnectHub,L=New York,ST=NY,C=US"
+          echo "=== Upload keystore created successfully ==="
+      - name: Configure signing for release build
+        script: |
+          cd android
+          echo "=== Configuring app signing ==="
+          cat >> app/build.gradle << 'EOF'
+          
+          android {
+              signingConfigs {
+                  upload {
+                      storeFile file(System.getProperty("user.home") + "/.android/upload-keystore.jks")
+                      storePassword "connecthub123"
+                      keyAlias "upload-key"
+                      keyPassword "connecthub123"
+                  }
+              }
+              buildTypes {
+                  release {
+                      signingConfig signingConfigs.upload
+                  }
+              }
+          }
+          EOF
+      - name: Clean and build signed release AAB
         script: |
           cd android
           chmod +x gradlew
           echo "=== Cleaning previous build ==="
           ./gradlew clean
-          echo "=== Building SIGNED debug AAB ==="
-          ./gradlew bundleDebug
-          echo "=== Verifying AAB is signed ==="
+          echo "=== Building RELEASE AAB with UPLOAD KEY ==="
+          ./gradlew bundleRelease
+          echo "=== Verifying AAB is signed with upload key ==="
           find app/build/outputs -name "*.aab" -exec echo "Found AAB: {}" \;
           find app/build/outputs -name "*.aab" -exec jarsigner -verify -verbose {} \;
       - name: Find all build outputs
