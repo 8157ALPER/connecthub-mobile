@@ -88,9 +88,15 @@ workflows:
           rm -f ~/.android/upload-keystore.jks
           keytool -genkey -v -keystore ~/.android/upload-keystore.jks -storepass connecthub123 -alias upload-key -keypass connecthub123 -keyalg RSA -keysize 2048 -validity 25000 -dname "CN=ConnectHub,OU=Mobile,O=ConnectHub,L=New York,ST=NY,C=US"
           echo "=== Upload keystore created successfully ==="
-      - name: Configure signing for release build
+      - name: Force version update and configure signing
         script: |
           cd android
+          echo "=== FORCING NEW VERSION CODE ==="
+          # Replace version code in build.gradle regardless of current value
+          sed -i 's/versionCode [0-9]*/versionCode 3/' app/build.gradle
+          sed -i 's/versionName "[^"]*"/versionName "1.0.2"/' app/build.gradle
+          echo "=== Updated versions ==="
+          grep -A 2 -B 2 "versionCode\|versionName" app/build.gradle
           echo "=== Configuring app signing ==="
           cat >> app/build.gradle << 'EOF'
           
