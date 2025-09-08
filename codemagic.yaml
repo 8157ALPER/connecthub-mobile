@@ -88,18 +88,23 @@ workflows:
           rm -f ~/.android/upload-keystore.jks
           keytool -genkey -v -keystore ~/.android/upload-keystore.jks -storepass connecthub123 -alias upload-key -keypass connecthub123 -keyalg RSA -keysize 2048 -validity 25000 -dname "CN=ConnectHub,OU=Mobile,O=ConnectHub,L=New York,ST=NY,C=US"
           echo "=== Upload keystore created successfully ==="
-      - name: Force API 35 and configure signing
+      - name: FORCE API 35 DIRECTLY and configure signing
         script: |
           cd android
-          echo "=== FORCING API LEVEL 35 ==="
-          # Ensure variables.gradle has API 35
+          echo "=== FORCING API 35 DIRECTLY IN BUILD.GRADLE ==="
+          # Replace ALL API level references directly in app/build.gradle
+          sed -i 's/compileSdk rootProject.ext.compileSdkVersion/compileSdk 35/' app/build.gradle
+          sed -i 's/targetSdkVersion rootProject.ext.targetSdkVersion/targetSdkVersion 35/' app/build.gradle
+          sed -i 's/minSdkVersion rootProject.ext.minSdkVersion/minSdkVersion 23/' app/build.gradle
+          # Also update variables.gradle as backup
           sed -i 's/targetSdkVersion = [0-9]*/targetSdkVersion = 35/' variables.gradle
           sed -i 's/compileSdkVersion = [0-9]*/compileSdkVersion = 35/' variables.gradle
-          # Ensure AndroidManifest has API 35
+          # Also update AndroidManifest
           sed -i 's/android:targetSdkVersion="[0-9]*"/android:targetSdkVersion="35"/' app/src/main/AndroidManifest.xml
-          echo "=== Verifying API levels ==="
+          echo "=== CRITICAL: What does app/build.gradle actually say? ==="
+          grep -A 10 -B 5 "compileSdk\|targetSdkVersion\|minSdkVersion" app/build.gradle
+          echo "=== Double-checking variables.gradle ==="
           grep "targetSdkVersion\|compileSdkVersion" variables.gradle
-          grep "targetSdkVersion" app/src/main/AndroidManifest.xml
           echo "=== Verifying version numbers ==="
           grep -A 2 -B 2 "versionCode\|versionName" app/build.gradle
           echo "=== Configuring app signing ==="
