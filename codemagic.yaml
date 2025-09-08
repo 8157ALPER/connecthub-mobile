@@ -88,11 +88,22 @@ workflows:
           rm -f ~/.android/upload-keystore.jks
           keytool -genkey -v -keystore ~/.android/upload-keystore.jks -storepass connecthub123 -alias upload-key -keypass connecthub123 -keyalg RSA -keysize 2048 -validity 25000 -dname "CN=ConnectHub,OU=Mobile,O=ConnectHub,L=New York,ST=NY,C=US"
           echo "=== Upload keystore created successfully ==="
-      - name: Configure signing for release build
+      - name: DEBUG - Force fresh files and check versions
         script: |
           cd android
-          echo "=== Checking version numbers ==="
-          grep -A 2 -B 2 "versionCode\|versionName" app/build.gradle
+          echo "=== DEBUGGING VERSION ISSUE ==="
+          echo "=== Showing ENTIRE build.gradle defaultConfig section ==="
+          sed -n '/defaultConfig/,/}/p' app/build.gradle
+          echo "=== Searching for ALL version mentions ==="
+          find . -name "*.gradle" -exec grep -H "version" {} \; || true
+          find . -name "*.xml" -exec grep -H -i "version" {} \; || true
+          echo "=== Current build.gradle file timestamp ==="
+          ls -la app/build.gradle
+          echo "=== FORCING VERSION TO 10 RIGHT NOW ==="
+          sed -i 's/versionCode [0-9]*/versionCode 10/' app/build.gradle
+          sed -i 's/versionName "[^"]*"/versionName "1.1.0"/' app/build.gradle
+          echo "=== Verifying change applied ==="
+          grep -A 5 -B 5 "versionCode\|versionName" app/build.gradle
           echo "=== Configuring app signing ==="
           cat >> app/build.gradle << 'EOF'
           
@@ -118,14 +129,16 @@ workflows:
           chmod +x gradlew
           echo "=== Cleaning previous build ==="
           ./gradlew clean
-          echo "=== Checking API levels ==="
-          grep -r "targetSdkVersion\|compileSdkVersion" .
-          echo "=== Building RELEASE AAB with UPLOAD KEY (API 35) ==="
+          echo "=== FINAL CHECK: What version is actually in build.gradle? ==="
+          grep -A 5 -B 5 "versionCode\|versionName" app/build.gradle
+          echo "=== Building RELEASE AAB with VERSION 10 ==="
           ./gradlew bundleRelease
-          echo "=== Verifying AAB is signed with upload key ==="
+          echo "=== Verifying AAB is signed and checking its version ==="
           find app/build/outputs -name "*.aab" -exec echo "Found AAB: {}" \;
           find app/build/outputs -name "*.aab" -exec jarsigner -verify -verbose {} \;
-          echo "=== Build completed with API level 35 ==="
+          echo "=== CRITICAL: What version did we actually build? ==="
+          find app/build/outputs -name "*.aab" -exec aapt dump badging {} \; | grep -E "package|versionCode|versionName" || true
+          echo "=== Build completed - VERSION SHOULD BE 10 ==="
       - name: Find all build outputs
         script: |
           cd android
