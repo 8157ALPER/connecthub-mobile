@@ -88,12 +88,20 @@ workflows:
           rm -f ~/.android/upload-keystore.jks
           keytool -genkey -v -keystore ~/.android/upload-keystore.jks -storepass connecthub123 -alias upload-key -keypass connecthub123 -keyalg RSA -keysize 2048 -validity 25000 -dname "CN=ConnectHub,OU=Mobile,O=ConnectHub,L=New York,ST=NY,C=US"
           echo "=== Upload keystore created successfully ==="
-      - name: Configure signing for release build
+      - name: Force API 35 and configure signing
         script: |
           cd android
+          echo "=== FORCING API LEVEL 35 ==="
+          # Ensure variables.gradle has API 35
+          sed -i 's/targetSdkVersion = [0-9]*/targetSdkVersion = 35/' variables.gradle
+          sed -i 's/compileSdkVersion = [0-9]*/compileSdkVersion = 35/' variables.gradle
+          # Ensure AndroidManifest has API 35
+          sed -i 's/android:targetSdkVersion="[0-9]*"/android:targetSdkVersion="35"/' app/src/main/AndroidManifest.xml
+          echo "=== Verifying API levels ==="
+          grep "targetSdkVersion\|compileSdkVersion" variables.gradle
+          grep "targetSdkVersion" app/src/main/AndroidManifest.xml
           echo "=== Verifying version numbers ==="
           grep -A 2 -B 2 "versionCode\|versionName" app/build.gradle
-          grep -A 2 -B 2 "versionCode\|versionName" capacitor-cordova-android-plugins/build.gradle
           echo "=== Configuring app signing ==="
           cat >> app/build.gradle << 'EOF'
           
