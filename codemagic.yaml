@@ -7,7 +7,7 @@ workflows:
       groups:
         - google_play
       vars:
-        PACKAGE_NAME: "com.connecthub.app"
+        PACKAGE_NAME: "com.connecthub.social"
         GOOGLE_PLAY_TRACK: internal
       node: 20.18.0
       java: 17
@@ -68,10 +68,10 @@ workflows:
           ls -la android/gradlew
           echo "=== Checking gradle wrapper ==="
           ls -la android/gradle/wrapper/
-      - name: Copy web assets to Android
+      - name: Sync Capacitor with API 35 settings
         script: |
-          echo "=== Copying web assets ==="
-          npx cap copy android
+          echo "=== Syncing Capacitor with API 35 config ==="
+          npx cap sync android
       - name: Check Gradle build files
         script: |
           cd android
@@ -88,23 +88,19 @@ workflows:
           rm -f ~/.android/upload-keystore.jks
           keytool -genkey -v -keystore ~/.android/upload-keystore.jks -storepass connecthub123 -alias upload-key -keypass connecthub123 -keyalg RSA -keysize 2048 -validity 25000 -dname "CN=ConnectHub,OU=Mobile,O=ConnectHub,L=New York,ST=NY,C=US"
           echo "=== Upload keystore created successfully ==="
-      - name: FORCE API 35 DIRECTLY and configure signing
+      - name: FINAL API 35 FIX and configure signing  
         script: |
           cd android
-          echo "=== FORCING API 35 DIRECTLY IN BUILD.GRADLE ==="
-          # Replace ALL API level references directly in app/build.gradle
+          echo "=== FINAL SOLUTION: Check what sync created, then force API 35 ==="
+          echo "=== Original build.gradle after sync ==="
+          grep -A 10 -B 5 "compileSdk\|targetSdkVersion\|minSdkVersion" app/build.gradle
+          echo "=== FORCING API 35 AFTER SYNC ==="
+          sed -i 's/compileSdk [0-9]*/compileSdk 35/' app/build.gradle
+          sed -i 's/targetSdkVersion [0-9]*/targetSdkVersion 35/' app/build.gradle  
           sed -i 's/compileSdk rootProject.ext.compileSdkVersion/compileSdk 35/' app/build.gradle
           sed -i 's/targetSdkVersion rootProject.ext.targetSdkVersion/targetSdkVersion 35/' app/build.gradle
-          sed -i 's/minSdkVersion rootProject.ext.minSdkVersion/minSdkVersion 23/' app/build.gradle
-          # Also update variables.gradle as backup
-          sed -i 's/targetSdkVersion = [0-9]*/targetSdkVersion = 35/' variables.gradle
-          sed -i 's/compileSdkVersion = [0-9]*/compileSdkVersion = 35/' variables.gradle
-          # Also update AndroidManifest
-          sed -i 's/android:targetSdkVersion="[0-9]*"/android:targetSdkVersion="35"/' app/src/main/AndroidManifest.xml
-          echo "=== CRITICAL: What does app/build.gradle actually say? ==="
+          echo "=== FINAL: What API levels are we actually using? ==="
           grep -A 10 -B 5 "compileSdk\|targetSdkVersion\|minSdkVersion" app/build.gradle
-          echo "=== Double-checking variables.gradle ==="
-          grep "targetSdkVersion\|compileSdkVersion" variables.gradle
           echo "=== Verifying version numbers ==="
           grep -A 2 -B 2 "versionCode\|versionName" app/build.gradle
           echo "=== Configuring app signing ==="
