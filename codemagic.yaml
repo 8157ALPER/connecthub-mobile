@@ -88,19 +88,34 @@ workflows:
           rm -f ~/.android/upload-keystore.jks
           keytool -genkey -v -keystore ~/.android/upload-keystore.jks -storepass connecthub123 -alias upload-key -keypass connecthub123 -keyalg RSA -keysize 2048 -validity 25000 -dname "CN=ConnectHub,OU=Mobile,O=ConnectHub,L=New York,ST=NY,C=US"
           echo "=== Upload keystore created successfully ==="
-      - name: FINAL API 35 FIX and configure signing  
+      - name: NUCLEAR API 35 FIX and configure signing  
         script: |
           cd android
-          echo "=== FINAL SOLUTION: Check what sync created, then force API 35 ==="
-          echo "=== Original build.gradle after sync ==="
+          echo "=== NUCLEAR OPTION: Force API 35 everywhere possible ==="
+          echo "=== Original files after sync ==="
           grep -A 10 -B 5 "compileSdk\|targetSdkVersion\|minSdkVersion" app/build.gradle
-          echo "=== FORCING API 35 AFTER SYNC ==="
-          sed -i 's/compileSdk [0-9]*/compileSdk 35/' app/build.gradle
-          sed -i 's/targetSdkVersion [0-9]*/targetSdkVersion 35/' app/build.gradle  
-          sed -i 's/compileSdk rootProject.ext.compileSdkVersion/compileSdk 35/' app/build.gradle
-          sed -i 's/targetSdkVersion rootProject.ext.targetSdkVersion/targetSdkVersion 35/' app/build.gradle
-          echo "=== FINAL: What API levels are we actually using? ==="
+          grep "Sdk\|API" variables.gradle || echo "No SDK info in variables.gradle"
+          echo "=== FORCING API 35 IN ALL POSSIBLE LOCATIONS ==="
+          # Force in main build.gradle
+          sed -i 's/compileSdk [0-9]*/compileSdk 35/g' app/build.gradle
+          sed -i 's/targetSdkVersion [0-9]*/targetSdkVersion 35/g' app/build.gradle  
+          sed -i 's/compileSdk rootProject.ext.compileSdkVersion/compileSdk 35/g' app/build.gradle
+          sed -i 's/targetSdkVersion rootProject.ext.targetSdkVersion/targetSdkVersion 35/g' app/build.gradle
+          # Force in variables.gradle
+          sed -i 's/compileSdkVersion = [0-9]*/compileSdkVersion = 35/g' variables.gradle
+          sed -i 's/targetSdkVersion = [0-9]*/targetSdkVersion = 35/g' variables.gradle
+          # Force in AndroidManifest.xml  
+          sed -i 's/android:targetSdkVersion="[0-9]*"/android:targetSdkVersion="35"/g' app/src/main/AndroidManifest.xml
+          sed -i 's/android:compileSdkVersion="[0-9]*"/android:compileSdkVersion="35"/g' app/src/main/AndroidManifest.xml
+          # Also try build.gradle at project level
+          sed -i 's/compileSdk [0-9]*/compileSdk 35/g' build.gradle || echo "No project-level compileSdk"
+          echo "=== VERIFICATION: All files after forcing ==="
+          echo "--- app/build.gradle ---"
           grep -A 10 -B 5 "compileSdk\|targetSdkVersion\|minSdkVersion" app/build.gradle
+          echo "--- variables.gradle ---"
+          grep "Sdk" variables.gradle
+          echo "--- AndroidManifest.xml ---"
+          grep "Sdk" app/src/main/AndroidManifest.xml || echo "No SDK in manifest"
           echo "=== Verifying version numbers ==="
           grep -A 2 -B 2 "versionCode\|versionName" app/build.gradle
           echo "=== Configuring app signing ==="
@@ -130,10 +145,15 @@ workflows:
           ./gradlew clean
           echo "=== Building RELEASE AAB with VERSION 100 ==="
           ./gradlew bundleRelease
-          echo "=== Verifying AAB is signed ==="
+          echo "=== CRITICAL: Analyzing built AAB file ==="
           find app/build/outputs -name "*.aab" -exec echo "Found AAB: {}" \;
+          echo "=== Extracting AAB contents to check API levels ==="
+          find app/build/outputs -name "*.aab" -exec aapt dump badging {} \; | grep -E "compileSdkVersion|targetSdkVersion|sdkVersion|platformBuildVersionName" || echo "Could not extract API info"
+          echo "=== Checking AndroidManifest.xml in AAB ==="
+          find app/build/outputs -name "*.aab" -exec aapt dump xmltree {} AndroidManifest.xml \; | grep -i sdk || echo "Could not extract manifest"
+          echo "=== Verifying AAB is signed ==="
           find app/build/outputs -name "*.aab" -exec jarsigner -verify -verbose {} \;
-          echo "=== Build completed with version 100 ==="
+          echo "=== Build completed - CHECK THE API LEVELS ABOVE ==="
       - name: Find all build outputs
         script: |
           cd android
