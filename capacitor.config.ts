@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.connecthub.app',
+  appId: 'com.connecthub.social',
   appName: 'ConnectHub',
   webDir: 'dist/public',
   server: {
