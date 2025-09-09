@@ -88,36 +88,54 @@ workflows:
           rm -f ~/.android/upload-keystore.jks
           keytool -genkey -v -keystore ~/.android/upload-keystore.jks -storepass connecthub123 -alias upload-key -keypass connecthub123 -keyalg RSA -keysize 2048 -validity 25000 -dname "CN=ConnectHub,OU=Mobile,O=ConnectHub,L=New York,ST=NY,C=US"
           echo "=== Upload keystore created successfully ==="
-      - name: NUCLEAR API 35 FIX and configure signing  
+      - name: WORKING API 35 FIX and configure signing  
         script: |
           cd android
-          echo "=== NUCLEAR OPTION: Force API 35 everywhere possible ==="
-          echo "=== Original files after sync ==="
-          grep -A 10 -B 5 "compileSdk\|targetSdkVersion\|minSdkVersion" app/build.gradle
-          grep "Sdk\|API" variables.gradle || echo "No SDK info in variables.gradle"
-          echo "=== FORCING API 35 IN ALL POSSIBLE LOCATIONS ==="
-          # Force in main build.gradle
-          sed -i 's/compileSdk [0-9]*/compileSdk 35/g' app/build.gradle
-          sed -i 's/targetSdkVersion [0-9]*/targetSdkVersion 35/g' app/build.gradle  
-          sed -i 's/compileSdk rootProject.ext.compileSdkVersion/compileSdk 35/g' app/build.gradle
-          sed -i 's/targetSdkVersion rootProject.ext.targetSdkVersion/targetSdkVersion 35/g' app/build.gradle
-          # Force in variables.gradle
-          sed -i 's/compileSdkVersion = [0-9]*/compileSdkVersion = 35/g' variables.gradle
-          sed -i 's/targetSdkVersion = [0-9]*/targetSdkVersion = 35/g' variables.gradle
-          # Force in AndroidManifest.xml  
-          sed -i 's/android:targetSdkVersion="[0-9]*"/android:targetSdkVersion="35"/g' app/src/main/AndroidManifest.xml
-          sed -i 's/android:compileSdkVersion="[0-9]*"/android:compileSdkVersion="35"/g' app/src/main/AndroidManifest.xml
-          # Also try build.gradle at project level
-          sed -i 's/compileSdk [0-9]*/compileSdk 35/g' build.gradle || echo "No project-level compileSdk"
-          echo "=== VERIFICATION: All files after forcing ==="
-          echo "--- app/build.gradle ---"
-          grep -A 10 -B 5 "compileSdk\|targetSdkVersion\|minSdkVersion" app/build.gradle
+          echo "=== WORKING SOLUTION: Direct file replacement ==="
+          echo "=== Before: variables.gradle ==="
+          cat variables.gradle
+          echo "=== DIRECT REPLACEMENT of variables.gradle ==="
+          cat > variables.gradle << 'EOF'
+ext {
+    minSdkVersion = 23
+    compileSdkVersion = 35
+    targetSdkVersion = 35
+    androidxActivityVersion = '1.9.2'
+    androidxAppCompatVersion = '1.7.0'
+    androidxCoordinatorLayoutVersion = '1.2.0'
+    androidxCoreVersion = '1.15.0'
+    androidxFragmentVersion = '1.8.4'
+    coreSplashScreenVersion = '1.0.1'
+    androidxWebkitVersion = '1.12.1'
+    junitVersion = '4.13.2'
+    androidxJunitVersion = '1.2.1'
+    androidxEspressoCoreVersion = '3.6.1'
+    cordovaAndroidVersion = '10.1.1'
+}
+EOF
+          echo "=== DIRECT REPLACEMENT of app/build.gradle defaultConfig ==="
+          # Replace the defaultConfig section with our version
+          perl -i -pe 'BEGIN{undef $/;} s/defaultConfig \{[^}]*\}/defaultConfig {
+        applicationId "com.connecthub.social"
+        minSdkVersion 23
+        targetSdkVersion 35
+        versionCode 100
+        versionName "2.0.0"
+        multiDexEnabled true
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        aaptOptions {
+             \/\/ Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
+             \/\/ Default: https:\/\/android.googlesource.com\/platform\/frameworks\/base\/+\/282e181b58cf72b6ca770dc7ca5f91f135444502\/tools\/aapt\/AaptAssets.cpp#61
+            ignoreAssetsPattern "!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~"
+        }
+    }/smg' app/build.gradle
+          # Also force compileSdk to be hardcoded
+          perl -i -pe 's/compileSdk rootProject\.ext\.compileSdkVersion/compileSdk 35/g' app/build.gradle
+          echo "=== VERIFICATION: What do files contain now? ==="
           echo "--- variables.gradle ---"
-          grep "Sdk" variables.gradle
-          echo "--- AndroidManifest.xml ---"
-          grep "Sdk" app/src/main/AndroidManifest.xml || echo "No SDK in manifest"
-          echo "=== Verifying version numbers ==="
-          grep -A 2 -B 2 "versionCode\|versionName" app/build.gradle
+          cat variables.gradle
+          echo "--- app/build.gradle (relevant parts) ---"
+          grep -A 15 -B 5 "compileSdk\|defaultConfig" app/build.gradle
           echo "=== Configuring app signing ==="
           cat >> app/build.gradle << 'EOF'
           
